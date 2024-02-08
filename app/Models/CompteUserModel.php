@@ -31,31 +31,13 @@ class CompteUserModel extends Model
         return $this->hasMany(TransactionModel::class, 'compteid', 'id')->orderby('created_at', 'Desc');
     }
 
-    public function transactionCredit()
-    {
-        return $this->hasMany(CreditModel::class, 'compteid', 'id')->orderby('created_at', 'Desc');
-    }
-
     public function validTransactions()
     {
         return $this->transaction()->where('status', 0);
     }
-
-    public function validTransactionsCredit()
-    {
-        return $this->transaction()->where('status', 0);
-    }
-
     public function credit()
     {
         return $this->validTransactions()
-            ->sum('credit');
-    }
-
-
-    public function creditCredi()
-    {
-        return $this->validTransactionsCredit()
             ->sum('credit');
     }
 
@@ -64,30 +46,15 @@ class CompteUserModel extends Model
         return $this->validTransactions()
             ->sum('debit');
     }
-    public function debitCredit()
-    {
-        return $this->validTransactionsCredit()
-            ->sum('debit');
-    }
-
-    public function balanceCredit()
-    {
-        return $this->debitCredit() - $this->creditCredi();
-    }
 
     public function balance()
     {
-        return $this->debit() - $this->credit();
+        return $this->credit() - $this->debit();
     }
 
     public function allowWithdraw($amount): bool
     {
         return $this->balance() >= $amount;
-    }
-
-    public function allowWithdrawCredit($amount): bool
-    {
-        return $this->balanceCredit() >= $amount;
     }
 
     public static function generateAccountNumber()
@@ -101,6 +68,7 @@ class CompteUserModel extends Model
         } else {
             $number = "GOM" . date("y") . "00001" . "0" . $digit; // s'il y aucun compte on génère le premier compte        
         }
+
         return $number;
     }
 }

@@ -10,11 +10,11 @@ use Laravel\Sanctum\HasApiTokens;
 
 class TransactionModel extends Model
 {
-    use HasApiTokens, HasFactory, Notifiable,HasUuids;
+    use HasApiTokens, HasFactory, Notifiable, HasUuids;
 
-     protected $table="t_user_transaction";
+    protected $table = "t_user_transaction";
 
-     protected $fillable = [
+    protected $fillable = [
         'designation',
         'currency',
         'debit',
@@ -28,8 +28,9 @@ class TransactionModel extends Model
         'id',
         'description'
     ];
-    public function agent(){
-        return $this->belongsTo(User::class,'userid' ,'id')->where('status',1);
+    public function agent()
+    {
+        return $this->belongsTo(User::class, 'userid', 'id')->where('status', 1);
     }
 
     public function compte()
@@ -37,4 +38,12 @@ class TransactionModel extends Model
         return $this->belongsTo(CompteUserModel::class, 'compteid', 'id');
     }
 
+    public static function transaction_usd()
+    {
+        return static::where('currency', '$');
+    }
+    public static function transaction_cdf()
+    {
+        return static::where('currency', 'Fc');
+    }
 }

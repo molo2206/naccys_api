@@ -28,8 +28,8 @@ class CompteUserController extends Controller
             }
             if ($request->typecompte == 'courant' || $request->typecompte == "credit") {
                 $compte = CompteUserModel::where('typecompte', 'credit')
-                ->where('userid', $request->userid)
-                ->get();
+                    ->where('userid', $request->userid)
+                    ->get();
                 if (count($compte) > 0) {
                     return response()->json([
                         "message" => 'Désolé on ne peut pas avoir deux comptes credits!',
@@ -39,19 +39,19 @@ class CompteUserController extends Controller
                     $user->count()->create([
                         'count_number' => $user->generateAccountNumber(),
                         'userid' => $user->id,
-                        'currency' => '$',
+                        'currency' => $request->currency,
                         'typecompte' => $request->typecompte,
                         'id' => count(CompteUserModel::all()) + 1
                     ]);
 
-                    Mail::to($user->email)->send(new Createmembre(
-                        $user->name,
-                        $user->post_name,
-                        $request->typecompte,
-                        $request->currency,
-                        $user->prename,
-                        $user->generateAccountNumber(),
-                    ));
+                    // Mail::to($user->email)->send(new Createmembre(
+                    //     $user->name,
+                    //     $user->post_name,
+                    //     $request->typecompte,
+                    //     $request->currency,
+                    //     $user->prename,
+                    //     $user->generateAccountNumber(),
+                    // ));
                     return response()->json([
                         "message" => "ok",
                         "code" => 200,

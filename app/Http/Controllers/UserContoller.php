@@ -27,7 +27,7 @@ class UserContoller extends Controller
         ]);
 
         if (User::where('email', $request->email)->exists()) {
-            $user = User::where('email', $request->email)->first();
+            $user = User::where('email', $request->email)->where('deleted', 0)->first();
 
             if ($user->status == 1) {
                 if (Hash::check($request->pswd, $user->pswd)) {
@@ -449,7 +449,7 @@ class UserContoller extends Controller
             'gender' => 'required',
             'adress' => 'required',
         ]);
-        
+
         $agent = TypePersonneModel::where('name', 'Membre')->first();
         if (User::where('email', $request->email)
             ->orwhere('phone', $request->phone)->exists()
@@ -481,7 +481,7 @@ class UserContoller extends Controller
                     'userid' => $user->id,
                     'currency' => '$',
                     'typecompte' => $typecompte,
-                    'id' => count(CompteUserModel::all())+1
+                    'id' => count(CompteUserModel::all()) + 1
                 ]);
 
                 Mail::to($request->email)->send(new Createmembre(
@@ -498,7 +498,6 @@ class UserContoller extends Controller
                     "code" => 200,
                     "data" => User::with('roles', 'type', 'permissions', 'count')->where('id', $user->id)->first(),
                 ], 200);
-
             } else {
 
                 $photo = ImageController::uploadImageUrl($request->profil, '/uploads/membre/');
@@ -522,7 +521,7 @@ class UserContoller extends Controller
                     'userid' => $user->id,
                     'currency' => '$',
                     'typecompte' => $typecompte,
-                    
+
                 ]);
 
                 Mail::to($request->email)->send(new Createmembre(
@@ -539,7 +538,6 @@ class UserContoller extends Controller
                     "code" => 200,
                     "data" => User::with('roles', 'type', 'permissions', 'count')->where('id', $user->id)->first(),
                 ], 200);
-                
             }
         }
     }
@@ -679,7 +677,7 @@ class UserContoller extends Controller
         $agent = TypePersonneModel::where('name', 'Agent')->first();
         return response()->json([
             "message" => 'success',
-            "data" => User::with('roles', 'type', 'permissions')->where('typeid', $agent->id)->orderBy('created_at', 'asc')->get(),
+            "data" => User::with('roles', 'type', 'permissions')->where('typeid', $agent->id)->where('deleted', 0)->orderBy('created_at', 'asc')->get(),
         ], 200);
     }
 
@@ -688,7 +686,7 @@ class UserContoller extends Controller
         $agent = TypePersonneModel::where('name', 'Membre')->first();
         return response()->json([
             "message" => 'success',
-            "data" => User::with('roles', 'type', 'permissions', 'count')->orderby('name', 'asc')->where('typeid', $agent->id)->orderBy('created_at', 'asc')->get(),
+            "data" => User::with('roles', 'type', 'permissions', 'count')->orderby('name', 'asc')->where('typeid', $agent->id)->where('deleted', 0)->orderBy('created_at', 'asc')->get(),
         ], 200);
     }
 
@@ -707,5 +705,32 @@ class UserContoller extends Controller
             "status" => 1,
             "data" => User::with('roles', 'type', 'permissions')->where('id', $user->id)->first(),
         ], 200);
+    }
+    public function destroy($id)
+    {
+        $user = User::where('deleted', 0)->find($id);
+        if ($user) {
+            if ($user->id == Auth::user()->id) {
+                return response()->json([
+                    "message" => "Vous ne pouvez pas supprimer un compte qui est actif"
+                ], 402);
+            }
+            foreach ($user->count()->get() as $account) {
+                if (count($account->transaction) > 0) {
+                    return response()->json([
+                        "message" => "Ce membre a déjà des transactions"
+                    ], 402);
+                }
+            }
+            $user->deleted = 1;
+            $user->save();
+            return response()->json([
+                "message" => "Suppression effectuée avec succès"
+            ], 200);
+        } else {
+            return response()->json([
+                "message" => "Id introuvable"
+            ], 404);
+        }
     }
 }

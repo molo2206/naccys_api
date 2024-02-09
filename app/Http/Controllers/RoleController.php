@@ -13,7 +13,7 @@ class RoleController extends Controller
             'name' => 'required',
         ]);
 
-        if (RoleModel::where('name',$request->name)->exists()) {
+        if (RoleModel::where('name', $request->name)->exists()) {
 
             return response()->json([
                 "message" => "Ce role existe déjà!",
@@ -31,7 +31,7 @@ class RoleController extends Controller
         }
     }
 
-   public function update_role(Request $request, $id)
+    public function update_role(Request $request, $id)
     {
         $request->validate([
             'name' => 'required|unique:t_roles,name,' . $id,
@@ -40,8 +40,7 @@ class RoleController extends Controller
         ]);
 
         $roles = RoleModel::where('id', $id)->first();
-        if ($roles) 
-        {
+        if ($roles) {
             $roles->name = $request->name;
             $roles->save();
             return response()->json([
@@ -55,19 +54,20 @@ class RoleController extends Controller
             ], 402);
         }
     }
-    
-     public function detailrole($id){
-        if(RoleModel::where('id', $id)->exists()){
+
+    public function detailrole($id)
+    {
+        if (RoleModel::where('id', $id)->exists()) {
             return response()->json([
                 "message" => "Liste des ressources",
                 "code" => 200,
                 "data" => RoleModel::where('id', $id)->first(),
             ]);
-        }else{
+        } else {
             return response()->json([
-                "message" => "Cet id ".$id,"n'est pas reconnue dans le système!",
+                "message" => "Cet id " . $id, "n'est pas reconnue dans le système!",
                 "code" => 402,
-            ],402);
+            ], 402);
         }
     }
 
@@ -76,7 +76,22 @@ class RoleController extends Controller
         return response()->json([
             "message" => "Liste des roles",
             "code" => 200,
-            "data" => RoleModel::all(),
+            "data" => RoleModel::where('deleted', 0)->get(),
         ]);
+    }
+    public function destroy($id)
+    {
+        $role = RoleModel::where('deleted', 0)->find($id);
+        if ($role) {
+            $role->deleted = 1;
+            $role->save();
+            return response()->json([
+                "message" => "Suppression effectuée avec succès"
+            ], 200);
+        } else {
+            return response()->json([
+                "message" => "Id introuvable"
+            ], 404);
+        }
     }
 }

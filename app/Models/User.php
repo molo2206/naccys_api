@@ -51,10 +51,11 @@ class User extends Authenticatable
     }
     public function count()
     {
-        return $this->hasMany(CompteUserModel::class, 'userid', 'id');
+        return $this->hasMany(CompteUserModel::class, 'userid', 'id')->where('deleted', 0);
     }
 
-    public function compte(){
+    public function compte()
+    {
         return $this->belongsToMany(User::class, 't_compte_user', 'userid', 'typecompte');
     }
 
@@ -71,7 +72,7 @@ class User extends Authenticatable
             $last_num = $last[0]->count_number; // récupération du dernier numéro de compte de l'utilisateur
             $code = str_pad(substr(str_replace(substr_replace($last_num, "", 10), "", $last_num), 0, -5) + 1, 1, 0, STR_PAD_LEFT);
             $number = 'GOM' . date('y') . str_replace(substr_replace(substr_replace($last_num, "", 10), "", 5), "", substr_replace($last_num, "", 10)) . $code . $digit;
-        } 
+        }
         return $number;
     }
 }

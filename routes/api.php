@@ -45,7 +45,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::get('/user/get_current_user', [UserContoller::class, 'getuser']);
     Route::get('/user/getusers', [UserContoller::class, 'getuser']);
     Route::get('/user/getmembers', [UserContoller::class, 'getMembre']);
-
+    Route::delete('/user/delete/{id}', [UserContoller::class, 'destroy']);
 
     Route::post('/user/new_agent', [UserContoller::class, 'create_agent']);
     Route::post('/user/create_member', [UserContoller::class, 'create_membre']);
@@ -59,9 +59,11 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::get('/typeperson/get_type_personne', [UserContoller::class, 'get_type_personne']);
     Route::get('/ressource/detailressource/{id}', [RessourceController::class, 'detailressource']);
     Route::get('/role/detailrole/{id}', [RoleController::class, 'detailrole']);
-
+    Route::delete('/role/delete/{id}', [RoleController::class, 'destroy']);
     // Transaction and count user
     Route::post('/count/create_count', [CompteUserController::class, 'create_count']);
+    Route::put('/count/update/{id}', [CompteUserController::class, 'update']);
+    Route::delete('/count/delete/{id}', [CompteUserController::class, 'destroy']);
     Route::post('/transaction/make_transaction', [TransactionController::class, 'make_transaction']);
     Route::post('/transaction/get_historique_by_date', [TransactionController::class, 'historiquetransaction_date']);
     Route::post('/transaction/get_historique_by_count', [TransactionController::class, 'historiquetransaction_count_number']);

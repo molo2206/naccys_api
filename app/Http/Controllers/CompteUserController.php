@@ -71,6 +71,33 @@ class CompteUserController extends Controller
             ], 402);
         }
     }
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'typecompte' => 'required',
+            'currency' => 'required',
+        ]);
+
+        $account = CompteUserModel::where('deleted', 0)->find($id);
+        if ($account) {
+            if (count($account->transaction) > 0) {
+                return response()->json([
+                    "message" => "Modification impossible, ce compte a déjà des transactions"
+                ], 402);
+            }
+
+            $account->typecompte = $request->typecompte;
+            $account->currency = $request->currency;
+            $account->save();
+            return response()->json([
+                "message" => "Modification reussi avec succès"
+            ], 200);
+        } else {
+            return response()->json([
+                "message" => "Id introuvable"
+            ], 404);
+        }
+    }
     public function listtypecompte()
     {
         return response()->json([
@@ -174,4 +201,26 @@ class CompteUserController extends Controller
     //         return json_encode(["message" => "not found"], 404);
     //     }
     // }
+
+    public function destroy($id)
+    {
+        $account = CompteUserModel::where('deleted', 0)->find($id);
+        if ($account) {
+            if (count($account->transaction) > 0) {
+                return response()->json([
+                    "message" => "Suppression impossible, ce compte a déjà des transactions"
+                ], 402);
+            }
+
+            $account->deleted = 1;
+            $account->save();
+            return response()->json([
+                "message" => "Suppression reussi avec succès"
+            ], 200);
+        } else {
+            return response()->json([
+                "message" => "Id introuvable"
+            ], 404);
+        }
+    }
 }
